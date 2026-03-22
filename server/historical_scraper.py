@@ -1,13 +1,3 @@
-"""
-NEPSE Historical Data Scraper
-Scrapes years of OHLCV data from Sharesansar date by date and stores in MySQL.
-Usage:
-    python historical_scraper.py                     # last 365 days
-    python historical_scraper.py --days 730          # last 2 years
-    python historical_scraper.py --from 2022-01-01   # from a specific date
-    python historical_scraper.py --from 2022-01-01 --to 2023-01-01
-"""
-
 import io
 import time
 import logging

@@ -13,5 +13,5 @@ export function changePct(open: number, close: number): number {
   return ((close - open) / open) * 100;
 }
 export function changeColor(pct: number): string {
-  return pct > 0 ? '#00d4aa' : pct < 0 ? '#ff4d6d' : '#94a3b8';
+  return pct > 0 ? '#16a34a' : pct < 0 ? '#dc2626' : '#6b7280';
 }

@@ -452,3 +452,83 @@ def fetch_logs(limit: int = Query(20)):
     cur.execute("SELECT * FROM fetch_logs ORDER BY fetched_at DESC LIMIT %s", (limit,))
     data = rows_to_dicts(cur); cur.close(); conn.close()
     return {"logs": data}
+
+
+@app.get("/nepse/candles/{symbol}")
+def candles(symbol: str, days: int = Query(90, ge=5, le=730)):
+    """
+    Returns OHLCV history for a symbol for the candlestick chart.
+    Data comes from the stocks table — run load_history.py first.
+    """
+    try:
+        conn = get_conn(); cur = conn.cursor()
+        cur.execute("""
+            SELECT trading_date, open_price, high_price, low_price,
+                   close_price, volume, turnover
+            FROM stocks
+            WHERE symbol = %s
+              AND open_price  IS NOT NULL
+              AND close_price IS NOT NULL
+              AND open_price  > 0
+              AND close_price > 0
+            ORDER BY trading_date ASC
+            LIMIT %s
+        """, (symbol.upper(), days))
+        rows = rows_to_dicts(cur)
+        cur.close(); conn.close()
+
+        if not rows:
+            raise HTTPException(
+                status_code=404,
+                detail=f"No candle data for {symbol.upper()}. Run: python load_history.py --symbol {symbol.upper()} --days {days}"
+            )
+
+        closes = [float(r["close_price"]) for r in rows]
+        highs  = [float(r["high_price"])  for r in rows]
+        lows   = [float(r["low_price"])   for r in rows]
+        first  = closes[0]; last = closes[-1]
+        chg    = round((last - first) / first * 100, 2) if first else 0
+
+        return {
+            "symbol":  symbol.upper(),
+            "candles": rows,
+            "summary": {
+                "days":        len(rows),
+                "period_high": max(highs),
+                "period_low":  min(lows),
+                "first_close": first,
+                "last_close":  last,
+                "change_pct":  chg,
+            }
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/nepse/nepse-index")
+def nepse_index(days: int = Query(60, ge=10, le=365)):
+    """
+    Returns daily market aggregate used to draw the NEPSE trend line.
+    avg_close across all stocks = proxy for market index.
+    """
+    try:
+        conn = get_conn(); cur = conn.cursor()
+        cur.execute("""
+            SELECT
+                trading_date,
+                ROUND(AVG(close_price), 2)     AS avg_close,
+                ROUND(SUM(turnover) / 1e7, 2)  AS total_turnover_cr,
+                COUNT(*)                        AS symbols_traded
+            FROM stocks
+            GROUP BY trading_date
+            ORDER BY trading_date DESC
+            LIMIT %s
+        """, (days,))
+        data = rows_to_dicts(cur)
+        cur.close(); conn.close()
+        data.reverse()
+        return {"data": data}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

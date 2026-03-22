@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import { AuthProvider } from '@/lib/auth';
 
 export const metadata: Metadata = {
-  title: 'NEPSE Analyzer',
-  description: 'nepse analyzer ',
+  title: 'NEPSE Dashboard',
+  description: 'Nepal Stock Exchange — DBMS Project 5th Sem',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
