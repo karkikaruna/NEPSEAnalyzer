@@ -42,3 +42,18 @@
 2026-03-20 22:44:04,363  INFO      Clean rows ready for DB: 342
 2026-03-20 22:44:04,713  INFO      DB write complete — inserted: 0, updated: 342
 2026-03-20 22:44:04,786  INFO      === Pipeline complete ✓ ===
+2026-03-22 17:28:40,938  INFO      DB config loaded → host=localhost:3306  db=nepse_db  user=root
+2026-03-22 17:29:10,570  INFO      DB config loaded → host=localhost:3306  db=nepse_db  user=root
+2026-03-22 17:29:10,743  INFO      Database initialised ✓
+2026-03-22 17:29:10,745  INFO      === Pipeline start | date=2026-03-22 ===
+2026-03-22 17:29:10,745  INFO      Fetching data for 2026-03-22 …
+2026-03-22 17:29:13,626  INFO      Raw columns from site: ['S.No', 'Symbol', 'Conf.', 'Open', 'High', 'Low', 'Close', 'LTP', 'Close - LTP', 'Close - LTP %', 'VWAP', 'Vol', 'Prev. Close', 'Turnover', 'Trans.', 'Diff', 'Range', 'Diff %', 'Range %', 'VWAP %', '120 Days', '180 Days', '52 Weeks High', '52 Weeks Low']
+2026-03-22 17:29:13,631  INFO      Mapped → symbol=Symbol open=Open high=High low=Low close=LTP vol=Vol turnover=Turnover
+2026-03-22 17:29:13,665  INFO      Clean rows ready for DB: 364
+2026-03-22 17:29:14,055  INFO      DB write complete — inserted: 364, updated: 0
+2026-03-22 17:29:14,138  INFO      === Pipeline complete ✓ ===
+2026-03-22 19:44:41,673  INFO      DB: localhost:3306 / nepse_db
+2026-03-22 19:44:41,738  INFO      Database initialised ✓
+2026-03-22 19:44:41,738  INFO      === Pipeline | date=2026-03-22 force=False ===
+2026-03-22 19:44:41,739  INFO      Skipping 2026-03-22 — weekend (NEPSE closed)
+2026-03-22 19:44:41,766  ERROR     fetch_log write failed: 1265 (01000): Data truncated for column 'status' at row 1

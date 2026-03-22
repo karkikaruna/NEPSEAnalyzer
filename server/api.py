@@ -24,7 +24,6 @@ app.add_middleware(
     allow_credentials=True, allow_methods=["*"], allow_headers=["*"],
 )
 
-# ── DB Config (works with local MySQL or any cloud MySQL) ─────
 DB_CONFIG = {
     "host":     os.getenv("DB_HOST",     "localhost"),
     "port":     int(os.getenv("DB_PORT", 3306)),
@@ -33,7 +32,6 @@ DB_CONFIG = {
     "database": os.getenv("DB_NAME",     "nepse_db"),
 }
 
-# SSL for cloud databases (Aiven, TiDB, etc.)
 SSL_CA = os.getenv("DB_SSL_CA", "")
 if SSL_CA and os.path.exists(SSL_CA):
     DB_CONFIG["ssl_ca"]          = SSL_CA
@@ -44,8 +42,6 @@ print(f"[API] DB → {DB_CONFIG['host']}:{DB_CONFIG['port']} / {DB_CONFIG['datab
 
 security = HTTPBearer(auto_error=False)
 
-
-# ── Pydantic models ───────────────────────────────────────────
 class RegisterRequest(BaseModel):
     username: str; email: str; password: str
 
@@ -57,11 +53,9 @@ class WatchlistRequest(BaseModel):
 
 class PortfolioRequest(BaseModel):
     symbol: str
-    kitta:  int       # number of shares bought
-    buy_price: float  # price per share when bought
+    kitta:  int      
+    buy_price: float
 
-
-# ── Helpers ───────────────────────────────────────────────────
 def get_conn():
     return mysql.connector.connect(**DB_CONFIG)
 
@@ -127,8 +121,6 @@ def init_tables():
 
 init_tables()
 
-
-# ── Auth ──────────────────────────────────────────────────────
 @app.post("/nepse/auth/register")
 def register(req: RegisterRequest):
     if len(req.username.strip()) < 2: raise HTTPException(400, "Username too short")
@@ -175,8 +167,6 @@ def me(user_id: int = Depends(get_user)):
     if not row: raise HTTPException(404, "User not found")
     return {"id": row[0], "username": row[1], "email": row[2], "created_at": str(row[3])}
 
-
-# ── Watchlist ─────────────────────────────────────────────────
 @app.get("/nepse/watchlist")
 def get_watchlist(user_id: int = Depends(get_user)):
     ld = latest_date()
@@ -214,8 +204,6 @@ def del_watchlist(symbol: str, user_id: int = Depends(get_user)):
     if affected == 0: raise HTTPException(404, "Symbol not in watchlist")
     return {"message": f"{symbol.upper()} removed"}
 
-
-# ── Portfolio ─────────────────────────────────────────────────
 @app.get("/nepse/portfolio")
 def get_portfolio(user_id: int = Depends(get_user)):
     """
@@ -251,7 +239,6 @@ def get_portfolio(user_id: int = Depends(get_user)):
     """, (ld, user_id))
     holdings = rows_to_dicts(cur)
 
-    # Aggregate summary
     total_invested = sum(float(h["invested_amount"] or 0) for h in holdings)
     total_current  = sum(float(h["current_value"]   or 0) for h in holdings)
     total_pl       = total_current - total_invested
@@ -287,7 +274,6 @@ def add_portfolio(req: PortfolioRequest, user_id: int = Depends(get_user)):
         conn.commit(); cur.close(); conn.close()
         return {"message": f"{sym} added to portfolio ({req.kitta} kitta @ ₨{req.buy_price})"}
     except mysql.connector.IntegrityError:
-        # Update existing
         cur.execute(
             "UPDATE portfolio SET kitta=%s, buy_price=%s WHERE user_id=%s AND symbol=%s",
             (req.kitta, req.buy_price, user_id, sym)
@@ -303,8 +289,6 @@ def del_portfolio(symbol: str, user_id: int = Depends(get_user)):
     if affected == 0: raise HTTPException(404, "Symbol not in portfolio")
     return {"message": f"{symbol.upper()} removed from portfolio"}
 
-
-# ── Candlestick data ──────────────────────────────────────────
 @app.get("/nepse/candles/{symbol}")
 def candles(symbol: str, days: int = Query(30, ge=5, le=365)):
     conn = get_conn(); cur = conn.cursor()
@@ -331,8 +315,6 @@ def candles(symbol: str, days: int = Query(30, ge=5, le=365)):
         }
     }
 
-
-# ── NEPSE Index (market-wide close price trend) ───────────────
 @app.get("/nepse/index")
 def nepse_index(days: int = Query(30, ge=5, le=365)):
     """
@@ -357,8 +339,6 @@ def nepse_index(days: int = Query(30, ge=5, le=365)):
     data = rows_to_dicts(cur); cur.close(); conn.close()
     return {"data": data, "days": len(data)}
 
-
-# ── Standard stock endpoints ──────────────────────────────────
 @app.get("/nepse/health")
 def health():
     try:

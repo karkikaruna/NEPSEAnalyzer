@@ -1,0 +1,6 @@
+2026-03-22 19:39:44,608  INFO      DB: localhost:3306 / nepse_db
+2026-03-22 20:37:52,767  INFO      DB: localhost:3306 / nepse_db
+2026-03-22 20:37:52,800  INFO      Database initialised ✓
+2026-03-22 20:37:52,800  INFO      === Pipeline | date=2026-03-22 force=False ===
+2026-03-22 20:37:52,801  INFO      Skipping 2026-03-22 — weekend (NEPSE closed)
+2026-03-22 20:37:52,830  ERROR     fetch_log write failed: 1265 (01000): Data truncated for column 'status' at row 1

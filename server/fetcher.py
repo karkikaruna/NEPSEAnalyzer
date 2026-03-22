@@ -20,7 +20,6 @@ from dotenv import load_dotenv
 
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), ".env"))
 
-# ── Logging ───────────────────────────────────────────────────────────────────
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s  %(levelname)-8s  %(message)s",
@@ -31,7 +30,6 @@ logging.basicConfig(
 )
 log = logging.getLogger(__name__)
 
-# ── Config ────────────────────────────────────────────────────────────────────
 config = {
     "DB_HOST":     os.getenv("DB_HOST",     "localhost"),
     "DB_PORT":     int(os.getenv("DB_PORT", 3306)),
@@ -41,8 +39,6 @@ config = {
 }
 log.info(f"DB: {config['DB_HOST']}:{config['DB_PORT']} / {config['DB_NAME']}")
 
-
-# ── DB helpers ────────────────────────────────────────────────────────────────
 def get_connection():
     return mysql.connector.connect(
         host=config["DB_HOST"], port=config["DB_PORT"],
@@ -94,8 +90,6 @@ def init_database():
     conn.commit(); cur.close(); conn.close()
     log.info("Database initialised ✓")
 
-
-# ── Check if date already has data ───────────────────────────────────────────
 def already_fetched(trading_date: str) -> bool:
     """Return True if we already have data for this date."""
     conn = get_connection(); cur = conn.cursor()
@@ -108,10 +102,8 @@ def already_fetched(trading_date: str) -> bool:
 def is_weekday(trading_date: str) -> bool:
     """NEPSE trades Mon–Fri. Skip weekends."""
     d = datetime.strptime(trading_date, "%Y-%m-%d")
-    return d.weekday() < 5  # 0=Mon, 4=Fri
+    return d.weekday() < 5 
 
-
-# ── Scraper ───────────────────────────────────────────────────────────────────
 def fetch_sharesansar(trading_date: str = None) -> pd.DataFrame | None:
     if trading_date is None:
         trading_date = date.today().strftime("%Y-%m-%d")
@@ -181,8 +173,6 @@ def fetch_sharesansar(trading_date: str = None) -> pd.DataFrame | None:
     log.info(f"Clean rows: {len(out)}")
     return out
 
-
-# ── DB Writer ─────────────────────────────────────────────────────────────────
 def save_to_mysql(df: pd.DataFrame, trading_date: str) -> dict:
     inserted = updated = 0
     conn = get_connection(); cur = conn.cursor()
@@ -231,21 +221,19 @@ def log_fetch(trading_date, rows_fetched, stats, status, error_msg=None):
     except Exception as e:
         log.error(f"fetch_log write failed: {e}")
 
-
-# ── Pipeline ──────────────────────────────────────────────────────────────────
 def run_pipeline(trading_date: str = None, force: bool = False):
     if trading_date is None:
         trading_date = date.today().strftime("%Y-%m-%d")
 
     log.info(f"=== Pipeline | date={trading_date} force={force} ===")
 
-    # Skip weekends unless forced
+ 
     if not force and not is_weekday(trading_date):
         log.info(f"Skipping {trading_date} — weekend (NEPSE closed)")
         log_fetch(trading_date, 0, {}, "skipped", "Weekend — market closed")
         return False
 
-    # Skip if already fetched unless forced
+ 
     if not force and already_fetched(trading_date):
         log.info(f"Data for {trading_date} already in DB. Use --force to re-fetch.")
         log_fetch(trading_date, 0, {}, "skipped", "Already in database")
@@ -267,7 +255,6 @@ def run_pipeline(trading_date: str = None, force: bool = False):
         return False
 
 
-# ── Backfill: fetch last N weekdays ──────────────────────────────────────────
 def backfill(days: int = 30):
     """Fetch the last N trading days worth of data."""
     log.info(f"Backfilling last {days} calendar days…")
@@ -283,11 +270,10 @@ def backfill(days: int = 30):
         success = run_pipeline(d, force=True)
         if success:
             fetched += 1
-            time.sleep(2)   # be polite to the server
+            time.sleep(2) 
     log.info(f"Backfill done — fetched {fetched} new dates")
 
 
-# ── Scheduler ─────────────────────────────────────────────────────────────────
 def scheduled_job():
     today = date.today().strftime("%Y-%m-%d")
     log.info(f"Scheduled job triggered for {today}")
@@ -301,10 +287,8 @@ def run_scheduler():
     """
     log.info("Scheduler started — will fetch daily at 16:00")
 
-    # Run once immediately on start
     run_pipeline()
 
-    # Schedule daily at 16:00
     schedule.every().day.at("16:00").do(scheduled_job)
 
     log.info("Waiting for next scheduled run… (Ctrl+C to stop)")
@@ -312,8 +296,6 @@ def run_scheduler():
         schedule.run_pending()
         time.sleep(60)
 
-
-# ── Entry point ───────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     import sys
     init_database()
