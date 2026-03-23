@@ -160,7 +160,7 @@ export default function PortfolioPage() {
           </form>
         </div>
 
-        {/* Holdings */}
+      
         {loading?<div style={{padding:40,textAlign:'center',color:'#6b7280',fontSize:13}}>Loading…</div>
         :holdings.length===0?(
           <div style={{padding:60,textAlign:'center',background:'#fff',border:'1px solid #e5e7eb',borderRadius:12}}>

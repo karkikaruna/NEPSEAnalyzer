@@ -1,0 +1,9 @@
+2026-03-23 02:27:58,297  INFO      DB: localhost:3306 / nepse_database
+2026-03-23 02:27:58,445  INFO      Database initialised ✓
+2026-03-23 02:27:58,445  INFO      === Pipeline | date=2026-03-23 force=False ===
+2026-03-23 02:27:58,514  INFO      Fetching 2026-03-23 from Sharesansar…
+2026-03-23 02:28:02,267  INFO      Raw columns: ['S.No', 'Symbol', 'Conf.', 'Open', 'High', 'Low', 'Close', 'LTP', 'Close - LTP', 'Close - LTP %', 'VWAP', 'Vol', 'Prev. Close', 'Turnover', 'Trans.', 'Diff', 'Range', 'Diff %', 'Range %', 'VWAP %', '120 Days', '180 Days', '52 Weeks High', '52 Weeks Low']
+2026-03-23 02:28:02,268  INFO      Using close column: 'LTP'
+2026-03-23 02:28:02,277  INFO      Clean rows: 364
+2026-03-23 02:28:02,409  INFO      Saved → inserted: 364, updated: 0
+2026-03-23 02:28:02,446  INFO      === Pipeline complete ✓ ===

@@ -32,7 +32,7 @@ def get_conn():
 
 
 def is_weekday(d: date) -> bool:
-    return d.weekday() < 5  # Mon=0 … Fri=4
+    return d.weekday() < 5 
 
 
 def already_in_db(d: str) -> bool:

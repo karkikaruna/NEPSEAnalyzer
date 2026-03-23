@@ -136,7 +136,7 @@ def save_candles(symbol: str, rows: list) -> tuple:
             symbol, row["date"],
             row["open"], row["high"], row["low"], row["close"],
             row["volume"],
-            None,       # turnover not provided by merolagani chart API
+            None,      
         ))
         if exists: updated += 1
         else:      inserted += 1
@@ -166,9 +166,8 @@ def main():
     from_d = args.from_d or ago(args.days)
 
     from_ts_val = to_ts(from_d)
-    to_ts_val   = to_ts(to_d) + 86400   # inclusive end
+    to_ts_val   = to_ts(to_d) + 86400 
 
-    # Resolve symbol list
     if args.symbol:
         symbols = [args.symbol.upper().strip()]
     else:
@@ -202,7 +201,7 @@ def main():
             f"{prefix} ✓ {ins:3d} new  {upd:3d} updated"
             f"  [{first['date']} C={first['close']:.2f} … {last['date']} C={last['close']:.2f}]"
         )
-        time.sleep(0.2)   # be polite to the server
+        time.sleep(0.2)  
 
     print(f"\n{'─'*60}")
     print(f"Done!  Inserted: {total_ins}   Updated: {total_upd}")
